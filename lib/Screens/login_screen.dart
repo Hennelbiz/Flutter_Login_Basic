@@ -37,8 +37,10 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  imagenBox("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMzIkbensg1c8hPloLD7sWL62Yrg2zVSQHi6kDD180hAyETcUF1bLLt1UvwSLbTEQyFga9ckVdxqniUQ&usqp=CAU"),
-                  SizedBox(height: 45.0,),
+                  imagenBox(),
+                  SizedBox(
+                    height: 45.0,
+                  ),
                   TextField(
                     controller: usuarioControlador,
                     decoration: InputDecoration(
@@ -50,7 +52,9 @@ class _LoginState extends State<Login> {
                       errorText: usuarioValidacion ? 'Agrega un usuario' : null,
                     ),
                   ),
-                  SizedBox(height: 25.0,),
+                  SizedBox(
+                    height: 25.0,
+                  ),
                   TextField(
                     controller: passwordControlador,
                     obscureText: true,
@@ -60,10 +64,13 @@ class _LoginState extends State<Login> {
                       hintText: "Contraseña",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32.0)),
-                      errorText: passwordValidacion ? 'Agrega una contraseña' : null,
+                      errorText:
+                          passwordValidacion ? 'Agrega una contraseña' : null,
                     ),
                   ),
-                  SizedBox(height: 35.0,),
+                  SizedBox(
+                    height: 35.0,
+                  ),
                   ElevatedButton(
                       onPressed: () async {
                         final resultadoUsuario = validarTextField(
@@ -73,18 +80,16 @@ class _LoginState extends State<Login> {
                         if (resultadoUsuario == false &&
                             resultadoPassword == false) {
                           //login.Login().loginHttpAsync(
-                              //usuarioControlador.text.trim().toUpperCase(),
-                              //passwordControlador.text.trim());
-                              var resultLogin = await login.Login().loginHttpAsync(usuarioControlador.text.trim().toUpperCase(), passwordControlador.text.trim());
-                              if(resultLogin.item1)
-                              {
-
-                              }
-                              else
-                              {
-                                descripcionAlerta = resultLogin.item2;
-                                _mostrarAlerta(context);
-                              }
+                          //usuarioControlador.text.trim().toUpperCase(),
+                          //passwordControlador.text.trim());
+                          var resultLogin = await login.Login().loginHttpAsync(
+                              usuarioControlador.text.trim().toUpperCase(),
+                              passwordControlador.text.trim());
+                          if (resultLogin.item1) {
+                          } else {
+                            descripcionAlerta = resultLogin.item2;
+                            _mostrarAlerta(context);
+                          }
                         }
                       },
                       child: const Text('Entrar'))
@@ -127,19 +132,23 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _mostrarAlerta(BuildContext context)
-  {
+  void _mostrarAlerta(BuildContext context) {
     showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text('Alert title'),
-        content: Text('$descripcionAlerta'),
-        actions: [
-          TextButton(onPressed: () => {Navigator.pop(context),}, child: Text('Cancelar')),
-          TextButton(onPressed: () => {Navigator.pop(context)}, child: Text('Ok')),
-        ],
-      )
-    );
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('Error'),
+              content: Text('$descripcionAlerta'),
+              actions: [
+                TextButton(
+                    onPressed: () => {
+                          Navigator.pop(context),
+                        },
+                    child: Text('Cancelar')),
+                TextButton(
+                    onPressed: () => {Navigator.pop(context)},
+                    child: Text('Ok')),
+              ],
+            ));
   }
 }
