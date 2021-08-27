@@ -22,6 +22,7 @@ class Login {
   };
 
   Future<String> loginAsync(String usuario, String password) async {
+    //
     var request = http.Request(
         'POST', Uri.parse('https://tlaloc-dev.bdscorpnet.mx/token'));
     request.bodyFields = {
@@ -53,24 +54,29 @@ class Login {
       "password": password
     };
 
-    final response = await http.post(
-        Uri.parse('https://tlaloc-dev.bdscorpnet.mx/token'),
-        body: formUrlEncoded(formMap));
+    try {
+      final response = await http.post(
+          Uri.parse('https://tlaloc-dev.bdscorpnet.mx/token'),
+          body: formUrlEncoded(formMap));
 
-    //var valorEstatus = response.statusCode;
-    //var valorBody = response.body;
-    if (response.statusCode == 200) {
+      //var valorEstatus = response.statusCode;
+      //var valorBody = response.body;
       //var prueba1 = jsonDecode(response.body);
       //var prueba3 = json.decode(response.body);
-      var valorDecode = utf8.decode(response.bodyBytes);
-      final valorDecodificado = jsonDecode(valorDecode);
       //var prueba4 = valorDecodificado["access_token"];
-      valoresToken = Token(
-          valorDecodificado["access_token"],
-          valorDecodificado["token_type"],
-          valorDecodificado["userName"],
-          valorDecodificado["tokenSyglobal"]);
-      return Tuple2(true, 'Bienvenido');
+      if (response.statusCode == 200) {
+        var valorDecode = utf8.decode(response.bodyBytes);
+        final valorDecodificado = jsonDecode(valorDecode);
+
+        valoresToken = Token(
+            valorDecodificado["access_token"],
+            valorDecodificado["token_type"],
+            valorDecodificado["userName"],
+            valorDecodificado["tokenSyglobal"]);
+        return Tuple2(true, 'Bienvenido');
+      }
+    } catch (e) {
+      return Tuple2(false, 'Error de conexión');
     }
     //print("Estatus code: $valorEstatus. Body: $valorBody");
     return Tuple2(false, 'Error al verificar el usuario y/o contraseña');

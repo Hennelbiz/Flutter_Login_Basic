@@ -12,6 +12,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final usuarioControlador = TextEditingController();
   final passwordControlador = TextEditingController();
+  bool resultadoValidacionUsuario = false;
+  bool resultadoValidacionPassword = false;
   bool usuarioValidacion = false;
   bool passwordValidacion = false;
   String? descripcionAlerta;
@@ -25,76 +27,75 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    //final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0; //Obtiene la parte del display que esta obscura que suele ser del teclado en la parte de abajo y si es asi quita el logo
+
     return Scaffold(
-      //resizeToAvoidBottomInset: false,
+      //resizeToAvoidBottomInset: false, //Para quitar el mensaje de overflow pero el teclado sigue apareciendo sobre los elementos
       body: Container(
-        child: Center(
-          child: Container(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(36.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  imagenBox(),
-                  SizedBox(
-                    height: 45.0,
-                  ),
-                  TextField(
-                    controller: usuarioControlador,
-                    decoration: InputDecoration(
+        child: Padding(
+          padding: const EdgeInsets.all(36.0),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(32.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                imagenBox(),
+                SizedBox(
+                  height: 45.0,
+                ),
+                TextField(
+                  controller: usuarioControlador,
+                  decoration: InputDecoration(
                       contentPadding:
                           EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
                       hintText: "Usuario",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32.0)),
-                      errorText: usuarioValidacion ? 'Agrega un usuario' : null,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 25.0,
-                  ),
-                  TextField(
-                    controller: passwordControlador,
-                    obscureText: true,
-                    decoration: InputDecoration(
+                      errorText:
+                          usuarioValidacion ? 'Agrega un usuario' : null),
+                ),
+                SizedBox(
+                  height: 25.0,
+                ),
+                TextField(
+                  controller: passwordControlador,
+                  obscureText: true,
+                  decoration: InputDecoration(
                       contentPadding:
                           EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
                       hintText: "Contraseña",
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32.0)),
+                          borderRadius: BorderRadius.circular(32)),
                       errorText:
-                          passwordValidacion ? 'Agrega una contraseña' : null,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 35.0,
-                  ),
-                  ElevatedButton(
-                      onPressed: () async {
-                        final resultadoUsuario = validarTextField(
-                            usuarioControlador.text.trim(), "Usuario");
-                        final resultadoPassword = validarTextField(
-                            passwordControlador.text.trim(), "Password");
-                        if (resultadoUsuario == false &&
-                            resultadoPassword == false) {
-                          //login.Login().loginHttpAsync(
-                          //usuarioControlador.text.trim().toUpperCase(),
-                          //passwordControlador.text.trim());
-                          var resultLogin = await login.Login().loginHttpAsync(
-                              usuarioControlador.text.trim().toUpperCase(),
-                              passwordControlador.text.trim());
-                          if (resultLogin.item1) {
-                          } else {
-                            descripcionAlerta = resultLogin.item2;
-                            _mostrarAlerta(context);
-                          }
-                        }
-                      },
-                      child: const Text('Entrar'))
-                ],
-              ),
+                          passwordValidacion ? 'Agrega una contraseña' : null),
+                ),
+                SizedBox(
+                  height: 35.0,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    resultadoValidacionUsuario = validarTextField(
+                        usuarioControlador.text.trim(), "Usuario");
+                    resultadoValidacionPassword = validarTextField(
+                        passwordControlador.text.trim(), "Password");
+                    if (!resultadoValidacionUsuario &&
+                        !resultadoValidacionPassword) {
+                      var resultadoLogin = await login.Login().loginHttpAsync(
+                          usuarioControlador.text.trim().toUpperCase(),
+                          passwordControlador.text);
+                      if (resultadoLogin.item1) {
+                        descripcionAlerta = resultadoLogin.item2;
+                        _mostrarAlerta(context);
+                      } else {
+                        descripcionAlerta = resultadoLogin.item2;
+                        _mostrarAlerta(context);
+                      }
+                    }
+                  },
+                  child: const Text('Entrar'),
+                )
+              ],
             ),
           ),
         ),
@@ -140,11 +141,6 @@ class _LoginState extends State<Login> {
               title: const Text('Error'),
               content: Text('$descripcionAlerta'),
               actions: [
-                TextButton(
-                    onPressed: () => {
-                          Navigator.pop(context),
-                        },
-                    child: Text('Cancelar')),
                 TextButton(
                     onPressed: () => {Navigator.pop(context)},
                     child: Text('Ok')),
