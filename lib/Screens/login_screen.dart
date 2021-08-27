@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login_basic/Services/login_service.dart' as login;
+import 'package:flutter_login_basic/Widgets/ImagenBox.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class _LoginState extends State<Login> {
   final passwordControlador = TextEditingController();
   bool usuarioValidacion = false;
   bool passwordValidacion = false;
+  String? descripcionAlerta;
 
   @override
   void dispose() {
@@ -24,9 +26,6 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*appBar: AppBar(
-        title: Text("Bienvenido"),
-      ),*/
       //resizeToAvoidBottomInset: false,
       body: Container(
         child: Center(
@@ -38,52 +37,54 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _imagenBox(
-                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMzIkbensg1c8hPloLD7sWL62Yrg2zVSQHi6kDD180hAyETcUF1bLLt1UvwSLbTEQyFga9ckVdxqniUQ&usqp=CAU"),
-                  SizedBox(
-                    height: 45.0,
-                  ),
-                  //_campoEntradaUsuario("Usuario", usuarioControlador),
+                  imagenBox("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMzIkbensg1c8hPloLD7sWL62Yrg2zVSQHi6kDD180hAyETcUF1bLLt1UvwSLbTEQyFga9ckVdxqniUQ&usqp=CAU"),
+                  SizedBox(height: 45.0,),
                   TextField(
                     controller: usuarioControlador,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                      contentPadding:
+                          EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
                       hintText: "Usuario",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32.0)),
                       errorText: usuarioValidacion ? 'Agrega un usuario' : null,
                     ),
                   ),
-                  SizedBox(
-                    height: 25.0,
-                  ),
-                  //_campoEntradaPassword("Contraseña"),
+                  SizedBox(height: 25.0,),
                   TextField(
                     controller: passwordControlador,
                     obscureText: true,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                      contentPadding:
+                          EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
                       hintText: "Contraseña",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32.0)),
-                      errorText:
-                          passwordValidacion ? 'Agrega una contraseña' : null,
+                      errorText: passwordValidacion ? 'Agrega una contraseña' : null,
                     ),
                   ),
-                  SizedBox(
-                    height: 35.0,
-                  ),
+                  SizedBox(height: 35.0,),
                   ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final resultadoUsuario = validarTextField(
                             usuarioControlador.text.trim(), "Usuario");
                         final resultadoPassword = validarTextField(
                             passwordControlador.text.trim(), "Password");
                         if (resultadoUsuario == false &&
                             resultadoPassword == false) {
-                          login.Login().loginHttpAsync(
-                              usuarioControlador.text.trim().toUpperCase(),
-                              passwordControlador.text.trim());
+                          //login.Login().loginHttpAsync(
+                              //usuarioControlador.text.trim().toUpperCase(),
+                              //passwordControlador.text.trim());
+                              var resultLogin = await login.Login().loginHttpAsync(usuarioControlador.text.trim().toUpperCase(), passwordControlador.text.trim());
+                              if(resultLogin.item1)
+                              {
+
+                              }
+                              else
+                              {
+                                descripcionAlerta = resultLogin.item2;
+                                _mostrarAlerta(context);
+                              }
                         }
                       },
                       child: const Text('Entrar'))
@@ -125,13 +126,20 @@ class _LoginState extends State<Login> {
       return false;
     }
   }
-}
 
-Widget _imagenBox(String url) {
-  return SizedBox(
-      height: 155.0,
-      child: Image.network(
-        url,
-        fit: BoxFit.contain,
-      ));
+  void _mostrarAlerta(BuildContext context)
+  {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text('Alert title'),
+        content: Text('$descripcionAlerta'),
+        actions: [
+          TextButton(onPressed: () => {Navigator.pop(context),}, child: Text('Cancelar')),
+          TextButton(onPressed: () => {Navigator.pop(context)}, child: Text('Ok')),
+        ],
+      )
+    );
+  }
 }

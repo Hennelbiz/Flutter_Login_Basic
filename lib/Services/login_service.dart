@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:tuple/tuple.dart';
+import 'package:flutter_login_basic/Models/Token.dart';
+import 'package:flutter_login_basic/Globals/Global.dart';
 
 class Login {
-
   String formUrlEncoded(Map data) {
     var formArray = [];
     data.forEach((k, v) {
@@ -42,25 +45,34 @@ class Login {
     }
   }
 
-  Future<bool> loginHttpAsync(String usuario, String password) async {
+  Future<Tuple2<bool, String>> loginHttpAsync(
+      String usuario, String password) async {
     Map<String, dynamic> formMap = {
       "grant_type": "password",
       "username": usuario,
       "password": password
     };
 
-    final response =
-        await http.post(Uri.parse('https://tlaloc-dev.bdscorpnet.mx/token'),
-            //body: convert.jsonEncode(formMap),
-            //body: formMap,
-            body: formUrlEncoded(formMap));
-            //headers: {"Content-Type": "application/x-www-form-urlencoded"});
+    final response = await http.post(
+        Uri.parse('https://tlaloc-dev.bdscorpnet.mx/token'),
+        body: formUrlEncoded(formMap));
 
-            //encoding: convert.Encoding.getByName("UTF-8"));
-
-    var valorEstatus = response.statusCode;
-    var valorBody = response.body;
-    print("Estatus code: $valorEstatus. Body: $valorBody");
-    return true;
+    //var valorEstatus = response.statusCode;
+    //var valorBody = response.body;
+    if (response.statusCode == 200) {
+      //var prueba1 = jsonDecode(response.body);
+      //var prueba3 = json.decode(response.body);
+      var valorDecode = utf8.decode(response.bodyBytes);
+      final valorDecodificado = jsonDecode(valorDecode);
+      //var prueba4 = valorDecodificado["access_token"];
+      valoresToken = Token(
+          valorDecodificado["access_token"],
+          valorDecodificado["token_type"],
+          valorDecodificado["userName"],
+          valorDecodificado["tokenSyglobal"]);
+      return Tuple2(true, 'Bienvenido');
+    }
+    //print("Estatus code: $valorEstatus. Body: $valorBody");
+    return Tuple2(false, 'Error al verificar el usuario y/o contraseña');
   }
 }
