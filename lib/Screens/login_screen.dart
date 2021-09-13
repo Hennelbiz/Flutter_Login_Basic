@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login_basic/Services/login_service.dart' as login;
+import 'package:flutter_login_basic/Services/login_service.dart';
 import 'package:flutter_login_basic/Widgets/ImagenBox.dart';
+import 'package:flutter_login_basic/Screens/usuario_screen.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -12,11 +13,11 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final usuarioControlador = TextEditingController();
   final passwordControlador = TextEditingController();
-  bool resultadoValidacionUsuario = false;
-  bool resultadoValidacionPassword = false;
-  bool usuarioValidacion = false;
-  bool passwordValidacion = false;
+  bool isUserCorrect = true;
+  bool isPasswordCorrect = true;
   String? descripcionAlerta;
+  bool loginSucess = false;
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -27,10 +28,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    //final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0; //Obtiene la parte del display que esta obscura que suele ser del teclado en la parte de abajo y si es asi quita el logo
-
     return Scaffold(
-      //resizeToAvoidBottomInset: false, //Para quitar el mensaje de overflow pero el teclado sigue apareciendo sobre los elementos
       body: Container(
         child: Padding(
           padding: const EdgeInsets.all(36.0),
@@ -53,7 +51,7 @@ class _LoginState extends State<Login> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32.0)),
                       errorText:
-                          usuarioValidacion ? 'Agrega un usuario' : null),
+                          isUserCorrect ? null : 'Agrega un usuario'),
                 ),
                 SizedBox(
                   height: 25.0,
@@ -68,33 +66,43 @@ class _LoginState extends State<Login> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32)),
                       errorText:
-                          passwordValidacion ? 'Agrega una contraseña' : null),
+                          isPasswordCorrect ? null : 'Agrega una contraseña'),
                 ),
                 SizedBox(
                   height: 35.0,
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    resultadoValidacionUsuario = validarTextField(
-                        usuarioControlador.text.trim(), "Usuario");
-                    resultadoValidacionPassword = validarTextField(
-                        passwordControlador.text.trim(), "Password");
-                    if (!resultadoValidacionUsuario &&
-                        !resultadoValidacionPassword) {
-                      var resultadoLogin = await login.Login().loginHttpAsync(
-                          usuarioControlador.text.trim().toUpperCase(),
-                          passwordControlador.text);
-                      if (resultadoLogin.item1) {
-                        descripcionAlerta = resultadoLogin.item2;
-                        _mostrarAlerta(context);
-                      } else {
-                        descripcionAlerta = resultadoLogin.item2;
-                        _mostrarAlerta(context);
-                      }
-                    }
-                  },
-                  child: const Text('Entrar'),
-                )
+                isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : ElevatedButton(
+                        onPressed: () async {
+                          _validacionDatos();
+                          if (!isUserCorrect && !isPasswordCorrect) {
+                            descripcionAlerta =
+                                "Error en el usuario y/o contraseña";
+                            _mostrarAlerta(context);
+                          } else {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            await _handleSignIn();
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+
+                          if (loginSucess) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => UsuarioScreen()));
+                          } else {
+                            _mostrarAlerta(context);
+                          }
+                        },
+                        child: const Text('Entrar'),
+                      )
               ],
             ),
           ),
@@ -103,33 +111,44 @@ class _LoginState extends State<Login> {
     );
   }
 
-  bool validarTextField(String valor, String tipo) {
-    if (tipo == "Usuario") {
-      if (valor.isEmpty) {
-        setState(() {
-          usuarioValidacion = true;
-        });
-      } else {
-        setState(() {
-          usuarioValidacion = false;
-        });
-      }
-    } else if (tipo == "Password") {
-      if (valor.isEmpty) {
-        setState(() {
-          passwordValidacion = true;
-        });
-      } else {
-        setState(() {
-          passwordValidacion = false;
-        });
-      }
+  _handleSignIn() async {
+    var resultadoLogin = await LoginService().loginHttpAsync(
+        usuarioControlador.text.trim().toUpperCase(), passwordControlador.text);
+
+    if (!resultadoLogin.item1) {
+      setState(() {
+        descripcionAlerta = resultadoLogin.item2;
+        loginSucess = resultadoLogin.item1;
+      });
+    } else {
+      setState(() {
+        loginSucess = resultadoLogin.item1;
+      });
+    }
+  }
+
+  _validacionDatos() {
+    if (usuarioControlador.text.isEmpty) {
+      setState(() {
+        isUserCorrect = false;
+      });
+    }
+    else
+    {
+      setState(() {
+        isUserCorrect = true;
+      });
     }
 
-    if (valor.isEmpty) {
-      return true;
-    } else {
-      return false;
+    if (passwordControlador.text.isEmpty) {
+      setState(() {
+        isPasswordCorrect = false;
+      });
+    }
+    else{
+      setState(() {
+        isPasswordCorrect = true;
+      });
     }
   }
 
