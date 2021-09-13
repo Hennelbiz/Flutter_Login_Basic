@@ -4,7 +4,7 @@ import 'package:tuple/tuple.dart';
 import 'package:flutter_login_basic/Models/Token.dart';
 import 'package:flutter_login_basic/Globals/Global.dart';
 
-class Login {
+class LoginService {
   String formUrlEncoded(Map data) {
     var formArray = [];
     data.forEach((k, v) {
