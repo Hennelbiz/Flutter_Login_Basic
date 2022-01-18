@@ -2,68 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login_basic/Globals/Global.dart';
 
 class UsuarioScreen extends StatefulWidget {
-  const UsuarioScreen({ Key? key }) : super(key: key);
-
+  const UsuarioScreen({Key? key}) : super(key: key);
   @override
   _UsuarioScreenState createState() => _UsuarioScreenState();
 }
 
 class _UsuarioScreenState extends State<UsuarioScreen> {
-  final ScrollController _controller = ScrollController();
-  bool _isLoading = false;
-  List<String> _dummy = List.generate(20, (index) => 'Item $index');
-
-  @override
-  void initState(){
-    _controller.addListener(_onScroll);
-    super.initState();
-  }
-
-  @override
-  void dispose(){
-    _controller.dispose();
-    super.dispose();
-  }
-
-  _onScroll(){
-    if(_controller.offset >= _controller.position.maxScrollExtent &&
-       !_controller.position.outOfRange)
-       {
-         setState(() {
-           _isLoading = true;
-         });
-         _fetchData();
-       }
-  }
-
-  Future _fetchData() async{
-    await new Future.delayed(new Duration(seconds: 2));
-
-    int lastIndex = _dummy.length;
-
-    setState(() {
-      _dummy.addAll(List.generate(15, (index) => "New Item ${lastIndex+index}"));
-      _isLoading = false;
-    });
-  }
+  int _index = 0;
+  PageController _pageController = PageController(viewportFraction: 0.7);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Lazy List'), automaticallyImplyLeading: false),
-      body: ListView.builder(
-        controller: _controller,
-        itemCount: _isLoading ? _dummy.length + 1 : _dummy.length,
-        itemBuilder: (context, index)
-        {
-          if(_dummy.length == index)
-          return Center(child: CircularProgressIndicator(),);
-
-          return ListTile(
-            title: Text(_dummy[index]),
-            subtitle: Text(valoresToken.accessToken.toString()),
-          );
-        },
+      appBar: AppBar(title: Text('Cards'), automaticallyImplyLeading: false),
+      body: Center(
+        child: SizedBox(
+          height: 750,
+          child: PageView.builder(
+            itemCount: 15,
+            controller: _pageController,
+            onPageChanged: (int index) => setState(() => _index = index),
+            itemBuilder: (_, i) {
+              return Transform.scale(
+                scale: i == _index ? 1 : 0.9,
+                child: Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Center(
+                    child: Text(
+                      "Card ${i + 1}",
+                      style: const TextStyle(fontSize: 32),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

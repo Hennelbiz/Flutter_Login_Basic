@@ -29,7 +29,8 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+        body: SafeArea(
+      child: Container(
         child: Padding(
           padding: const EdgeInsets.all(36.0),
           child: SingleChildScrollView(
@@ -50,8 +51,7 @@ class _LoginState extends State<Login> {
                       hintText: "Usuario",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(32.0)),
-                      errorText:
-                          isUserCorrect ? null : 'Agrega un usuario'),
+                      errorText: isUserCorrect ? null : 'Agrega un usuario'),
                 ),
                 SizedBox(
                   height: 25.0,
@@ -108,7 +108,7 @@ class _LoginState extends State<Login> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   _handleSignIn() async {
@@ -132,9 +132,7 @@ class _LoginState extends State<Login> {
       setState(() {
         isUserCorrect = false;
       });
-    }
-    else
-    {
+    } else {
       setState(() {
         isUserCorrect = true;
       });
@@ -144,8 +142,7 @@ class _LoginState extends State<Login> {
       setState(() {
         isPasswordCorrect = false;
       });
-    }
-    else{
+    } else {
       setState(() {
         isPasswordCorrect = true;
       });
